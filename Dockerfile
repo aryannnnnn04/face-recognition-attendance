@@ -5,7 +5,6 @@ FROM python:3.9-slim
 WORKDIR /app
 
 # Install system-level dependencies needed for dlib and opencv
-# This is the key step that fixes the build failures
 RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
@@ -18,8 +17,13 @@ RUN apt-get update && apt-get install -y \
 # Copy the requirements file into the container
 COPY requirements.txt requirements.txt
 
-# Install any needed packages specified in requirements.txt
-# This will now succeed because the system dependencies are installed
+# --- THE CRITICAL FIX ---
+# Install the most memory-intensive packages one by one FIRST
+# This allows the server to dedicate all resources to each hard task
+RUN pip install --no-cache-dir dlib==19.24.2
+RUN pip install --no-cache-dir opencv-python==4.8.1.78
+
+# Now, install the rest of the (much smaller) packages
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application code into the container
@@ -29,4 +33,17 @@ COPY . .
 EXPOSE 5000
 
 # Run the app using gunicorn
-CMD ["gunicorn", "--workers", "3", "--bind", "0.0.0.0:5000", "app:app"]
+CMD ["gunicorn", "--workers", "2", "--bind", "0.0.0.0:5000", "app:app"]
+```
+
+### **This is the Final Push**
+
+1.  **Save the changes** to your `Dockerfile` in VS Code.
+
+2.  **Upload the final fix to GitHub.** Open your terminal and run:
+    ```bash
+    git add .
+    git commit -m "Optimize Dockerfile for low-memory build environment"
+    git push
+    
+
