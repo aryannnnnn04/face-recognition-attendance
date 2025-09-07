@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Employee - Attendance System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f8fc;
+        }
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0,0,0,.05);
+        }
+        .card {
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,.08);
+            border-radius: 12px;
+        }
+        .card-header {
+            background-color: #fff;
+            border-bottom: 1px solid #e9ecef;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            padding: 1.25rem;
+        }
+        .form-control:focus, .form-control:active {
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+            border-color: #86b7fe;
+        }
+        .required-field::after {
+            content: "*";
+            color: #dc3545;
+            margin-left: 4px;
+        }
+        .btn-primary {
+             box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
+        }
+        .image-uploader {
+            border: 2px dashed #dee2e6;
+            border-radius: .75rem;
+            padding: 1rem;
+            text-align: center;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            transition: background-color .2s ease-in-out, border-color .2s ease-in-out;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .image-uploader:hover {
+            background-color: #e9ecef;
+            border-color: #0d6efd;
+        }
+        .image-uploader img {
+            max-width: 100%;
+            max-height: 250px; /* Limit preview height */
+            object-fit: contain;
+            border-radius: .5rem;
+        }
+        .image-uploader input[type="file"] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="fas fa-user-check me-2"></i>Attendance System</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/">Dashboard</a>
+                <a class="nav-link active" href="/employees">Employees</a>
+                <a class="nav-link" href="/attendance">Attendance</a>
+                <a class="nav-link" href="/recognition">Recognition</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-8">
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="fw-bold mb-1"><i class="fas fa-user-plus me-2 text-primary"></i>Register New Employee</h2>
+                        <p class="text-muted mb-0">Fill out the form below to add a new team member.</p>
+                    </div>
+                </div>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <div class="card">
+                    <div class="card-body p-4 p-md-5">
+                        <form method="POST" enctype="multipart/form-data" id="employeeForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5 class="mb-4 fw-bold">Employee Details</h5>
+                                    <div class="mb-3">
+                                        <label for="employee_id" class="form-label required-field">Employee ID</label>
+                                        <input type="text" class="form-control" id="employee_id" name="employee_id" required placeholder="e.g., EMP001">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="name" class="form-label required-field">Full Name</label>
+                                        <input type="text" class="form-control" id="name" name="name" required placeholder="Enter full name">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label required-field">Email</label>
+                                        <input type="email" class="form-control" id="email" name="email" required placeholder="Enter work email">
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="department" class="form-label required-field">Department</label>
+                                        <input type="text" class="form-control" id="department" name="department" required placeholder="e.g., Engineering">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <h5 class="mb-4 fw-bold">Profile Photo</h5>
+                                     <label for="photo" class="image-uploader" id="imageUploader">
+                                        <input type="file" id="photo" name="photo" accept="image/png,image/jpeg" required>
+                                        <div id="previewPlaceholder">
+                                            <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-2"></i>
+                                            <p class="mb-0 text-muted">Click to upload photo</p>
+                                            <small class="text-muted">PNG or JPG, max 5MB</small>
+                                        </div>
+                                        <img id="imagePreview" src="" alt="Image Preview" style="display: none;">
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <hr class="my-4">
+
+                            <div class="d-flex justify-content-end">
+                                <a href="/employees" class="btn btn-light me-2">
+                                    <i class="fas fa-times me-1"></i>Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Save Employee
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const photoInput = document.getElementById('photo');
+        const imageUploader = document.getElementById('imageUploader');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewPlaceholder = document.getElementById('previewPlaceholder');
+
+        imageUploader.addEventListener('click', () => {
+            photoInput.click();
+        });
+
+        photoInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                previewPlaceholder.style.display = 'none';
+                imagePreview.style.display = 'block';
+                reader.onload = function(e) {
+                    imagePreview.setAttribute('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            } else {
+                previewPlaceholder.style.display = 'flex';
+                imagePreview.style.display = 'none';
+                imagePreview.setAttribute('src', '');
+            }
+        });
+    </script>
+</body>
+</html>
+

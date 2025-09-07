@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Records - Attendance System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f8fc; /* Softer background color */
+        }
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0,0,0,.05);
+        }
+        .card {
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,.08);
+            border-radius: 12px;
+        }
+        .card-header {
+            background-color: #fff;
+            border-bottom: 1px solid #e9ecef;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            padding: 1.25rem;
+        }
+        .table thead th {
+            font-weight: 600;
+            color: #495057;
+            border-bottom-width: 1px;
+            white-space: nowrap;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #f1f3f5;
+        }
+        .badge {
+            font-weight: 500;
+            padding: 0.5em 0.75em;
+        }
+        .badge-success-light {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+        .badge-warning-light {
+            background-color: #fff3cd;
+            color: #664d03;
+        }
+        .badge-secondary-light {
+            background-color: #e2e3e5;
+            color: #41464b;
+        }
+        .btn-group .btn {
+            font-weight: 500;
+        }
+        .btn-group .btn.active {
+            background-color: #0d6efd;
+            color: white;
+            box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
+        }
+        .form-control:focus {
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+            border-color: #86b7fe;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="fas fa-user-check me-2"></i>Attendance System</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/">Dashboard</a>
+                <a class="nav-link" href="/employees">Employees</a>
+                <a class="nav-link active" href="/attendance">Attendance</a>
+                <a class="nav-link" href="/recognition">Recognition</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-1"><i class="fas fa-history me-2 text-primary"></i>Attendance History</h2>
+                <p class="text-muted mb-0">Review and filter past attendance records.</p>
+            </div>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0"><i class="fas fa-search"></i></span>
+                            <input type="text" id="searchInput" class="form-control border-0 bg-light" placeholder="Search by employee name...">
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <div class="btn-group" role="group" aria-label="Date Filters">
+                            <button type="button" class="btn btn-outline-primary" onclick="filterByDate(30)">Last 30 Days</button>
+                            <button type="button" class="btn btn-outline-primary" onclick="filterByDate(7)">Last 7 Days</button>
+                            <button type="button" class="btn btn-outline-primary" onclick="filterByDate(1)">Today</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0 fw-bold">Attendance Records</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0" id="attendanceTable">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="py-3 ps-4"><i class="fas fa-calendar-alt me-2"></i>Date</th>
+                                <th class="py-3"><i class="fas fa-user me-2"></i>Employee</th>
+                                <th class="py-3"><i class="fas fa-building me-2"></i>Department</th>
+                                <th class="py-3"><i class="fas fa-sign-in-alt me-2"></i>Check In</th>
+                                <th class="py-3"><i class="fas fa-sign-out-alt me-2"></i>Check Out</th>
+                                <th class="py-3"><i class="fas fa-clock me-2"></i>Duration</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in records %}
+                            <tr data-date="{{ record.date_iso }}">
+                                <td class="align-middle ps-4"><strong>{{ moment(record.date).format('DD MMM YYYY') }}</strong></td>
+                                <td class="align-middle employee-name">{{ record.name }}</td>
+                                <td class="align-middle"><span class="badge badge-secondary-light">{{ record.department }}</span></td>
+                                <td class="align-middle">
+                                    <span class="badge {{ 'badge-success-light' if record.check_in_time else 'badge-secondary-light' }}">
+                                        {{ moment(record.check_in_time).format('hh:mm A') if record.check_in_time else 'N/A' }}
+                                    </span>
+                                </td>
+                                <td class="align-middle">
+                                    <span class="badge {{ 'badge-warning-light' if record.check_out_time else 'badge-secondary-light' }}">
+                                        {{ moment(record.check_out_time).format('hh:mm A') if record.check_out_time else 'N/A' }}
+                                    </span>
+                                </td>
+                                <td class="align-middle fw-bold">
+                                    {{ record.duration or '-' }}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <div class="text-muted">
+                                        <i class="fas fa-calendar-times fa-4x mb-3 opacity-50"></i>
+                                        <h5 class="fw-bold">No Attendance Records Found</h5>
+                                        <p>No attendance has been recorded in the last 30 days.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            <!-- NEW: Row for "No results found" message -->
+                            <tr id="noResultsRow" style="display: none;">
+                                <td colspan="6" class="text-center py-5">
+                                    <div class="text-muted">
+                                        <i class="fas fa-search fa-4x mb-3 opacity-50"></i>
+                                        <h5 class="fw-bold">No Records Found</h5>
+                                        <p>Your search and filter combination returned no results.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const searchInput = document.getElementById('searchInput');
+        const attendanceTable = document.getElementById('attendanceTable').getElementsByTagName('tbody')[0];
+        const tableRows = Array.from(attendanceTable.querySelectorAll('tr[data-date]')); // Only grab data rows
+        const noResultsRow = document.getElementById('noResultsRow');
+        const filterButtons = document.querySelectorAll('.btn-group .btn');
+
+        function performFilter() {
+            const searchText = searchInput.value.toLowerCase();
+            const activeFilterBtn = document.querySelector('.btn-group .btn.active');
+            // Default to 30 days if no button is active for some reason
+            const days = activeFilterBtn ? parseInt(activeFilterBtn.getAttribute('onclick').match(/\d+/)[0], 10) : 30;
+            
+            const cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - days + 1);
+            cutoffDate.setHours(0, 0, 0, 0);
+
+            let visibleRowCount = 0;
+
+            tableRows.forEach(row => {
+                const nameCell = row.querySelector('.employee-name');
+                const rowDate = new Date(row.dataset.date);
+
+                if (nameCell) {
+                    const name = nameCell.textContent.toLowerCase();
+                    const nameMatch = name.includes(searchText);
+                    const dateMatch = rowDate >= cutoffDate;
+
+                    if (nameMatch && dateMatch) {
+                        row.style.display = "";
+                        visibleRowCount++;
+                    } else {
+                        row.style.display = "none";
+                    }
+                }
+            });
+
+            // Show or hide the "No results" message
+            if (visibleRowCount === 0) {
+                noResultsRow.style.display = "";
+            } else {
+                noResultsRow.style.display = "none";
+            }
+        }
+
+        function filterByDate(days) {
+            filterButtons.forEach(button => button.classList.remove('active'));
+            const clickedButton = Array.from(filterButtons).find(btn => btn.getAttribute('onclick') === `filterByDate(${days})`);
+            if (clickedButton) {
+                clickedButton.classList.add('active');
+            }
+            performFilter();
+        }
+
+        searchInput.addEventListener('keyup', performFilter);
+        
+        document.addEventListener('DOMContentLoaded', () => {
+             filterByDate(30); // Set initial filter on page load
+        });
+
+    </script>
+</body>
+</html>
+
