@@ -5,6 +5,7 @@ FROM python:3.9-slim
 WORKDIR /app
 
 # Install system-level dependencies needed for dlib and opencv
+# This is the key step that fixes the build failures
 RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
@@ -34,16 +35,4 @@ EXPOSE 5000
 
 # Run the app using gunicorn
 CMD ["gunicorn", "--workers", "2", "--bind", "0.0.0.0:5000", "app:app"]
-```
-
-### **This is the Final Push**
-
-1.  **Save the changes** to your `Dockerfile` in VS Code.
-
-2.  **Upload the final fix to GitHub.** Open your terminal and run:
-    ```bash
-    git add .
-    git commit -m "Optimize Dockerfile for low-memory build environment"
-    git push
-    
 
