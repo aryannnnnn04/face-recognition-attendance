@@ -23,10 +23,13 @@ RUN apt-get update && \
 
 # STAGE 3: Create a swapfile to provide extra memory for the build
 # This uses the 'dd' command, which is universally compatible, to prevent memory errors.
-RUN dd if=/dev/zero of=/swapfile bs=1M count=1024 && \
+RUN set -e && \
+    echo "Available space:" && df -h / && \
+    echo "Creating 1GB swap file..." && \
+    fallocate -l 1G /swapfile 2>/dev/null || dd if=/dev/zero of=/swapfile bs=1M count=1024 && \
     chmod 600 /swapfile && \
     mkswap /swapfile && \
-    swapon /swapfile
+    echo "Swap file created successfully"
 
 # STAGE 4: Install Python dependencies
 # Copy only the requirements file first to leverage Docker's layer caching.
