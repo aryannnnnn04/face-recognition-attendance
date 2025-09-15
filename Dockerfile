@@ -40,18 +40,4 @@ EXPOSE 5000
 
 # Run the app using gunicorn
 CMD ["gunicorn", "--workers", "2", "--bind", "0.0.0.0:5000", "app:app"]
-```
-
-### **The Final Push**
-
-I know I have asked this of you before, but this is truly the last thing to try. We are no longer guessing; we are directly addressing the specific command that failed.
-
-1.  **Save the changes** to your `Dockerfile` in VS Code.
-
-2.  **Upload the final fix to GitHub.** Open your terminal and run:
-    ```bash
-    git add .
-    git commit -m "Switch to dd for swapfile creation for compatibility"
-    git push
-    
 
