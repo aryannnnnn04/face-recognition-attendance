@@ -1,57 +1,49 @@
-# Use an official Python runtime as a parent image
-FROM python:3.9-slim
+# STAGE 1: Define a stable base with a specific Python version
+FROM python:3.9-slim-bullseye
 
-# Set the working directory in the container
+# Set environment variables for a cleaner build
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# Set the working directory inside the container
 WORKDIR /app
 
-# Install system-level dependencies needed for dlib and opencv
-RUN apt-get update && apt-get install -y \
+# STAGE 2: Install system-level dependencies
+# This is critical for compiling dlib and opencv successfully.
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
     build-essential \
     cmake \
     libopenblas-dev \
     liblapack-dev \
     libjpeg-dev \
     libgtk2.0-dev \
+    # Clean up apt-get cache to keep the image small
     && rm -rf /var/lib/apt/lists/*
 
-# --- THE FINAL, UNIVERSAL MEMORY FIX ---
-# Use the 'dd' command which is more compatible than 'fallocate'
+# STAGE 3: Create a swapfile to provide extra memory for the build
+# This uses the 'dd' command, which is universally compatible, to prevent memory errors.
 RUN dd if=/dev/zero of=/swapfile bs=1M count=1024 && \
     chmod 600 /swapfile && \
     mkswap /swapfile && \
     swapon /swapfile
 
-# Copy the requirements file into the container
-COPY requirements.txt requirements.txt
-
-# Install the Python dependencies
-# This will now have enough memory to succeed
+# STAGE 4: Install Python dependencies
+# Copy only the requirements file first to leverage Docker's layer caching.
+COPY requirements.txt .
+# The installation will now have enough memory to succeed.
 RUN pip install --no-cache-dir -r requirements.txt
 
-# --- Clean up the swap file ---
+# STAGE 5: Clean up the swapfile after the heavy installation is done
 RUN swapoff /swapfile && \
     rm /swapfile
 
-# Copy the rest of the application code into the container
+# STAGE 6: Copy the application code into the container
 COPY . .
 
-# Tell Docker that the container listens on port 5000
+# Expose the port the app runs on
 EXPOSE 5000
 
-# Run the app using gunicorn
+# STAGE 7: Run the application using a production-ready server
+# This command starts gunicorn to serve your Flask app.
 CMD ["gunicorn", "--workers", "2", "--bind", "0.0.0.0:5000", "app:app"]
-
-
-### **The Real Final Push**
-
-#You are so close you can taste it. Let's finish this.
-
-#1.  **Replace the content** of your `Dockerfile` in VS Code with the clean version above. Make sure there are no extra characters anywhere.
-
-#2.  **Push the final fix to GitHub.** This is it.
-   # ```bash
-   # git add .
-    #git commit -m "Remove Git merge conflict markers from Dockerfile"
-   # git push
-    
-
