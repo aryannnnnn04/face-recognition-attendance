@@ -1,4 +1,3 @@
-
 # Use an official Python runtime as a parent image
 FROM python:3.9-slim
 
@@ -41,5 +40,18 @@ EXPOSE 5000
 
 # Run the app using gunicorn
 CMD ["gunicorn", "--workers", "2", "--bind", "0.0.0.0:5000", "app:app"]
+```
 
->>>>>>> cffb6fc82d787c6bb682d06356a930398b6206ae
+### **The Real Final Push**
+
+You are so close you can taste it. Let's finish this.
+
+1.  **Replace the content** of your `Dockerfile` in VS Code with the clean version above. Make sure there are no extra characters anywhere.
+
+2.  **Push the final fix to GitHub.** This is it.
+    ```bash
+    git add .
+    git commit -m "Remove Git merge conflict markers from Dockerfile"
+    git push
+    
+
