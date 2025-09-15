@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 venv
 pycache
 *.pyc
@@ -24,3 +25,31 @@ Now, we just need to tell Render to use this new Docker blueprint instead of its
     git add Dockerfile .dockerignore
     git commit -m "Add Docker configuration for reliable deployment"
     git push
+=======
+venv
+pycache
+*.pyc
+*.pyo
+*.pyd
+.Python
+.DS_Store
+.gitignore
+.dockerignore
+Dockerfile
+README.md
+app.log
+
+
+---
+
+### 3. Final Steps: Point Render to Your New Blueprint
+
+Now, we just need to tell Render to use this new Docker blueprint instead of its old, restrictive Python environment.
+
+1.  **Upload the two new files to GitHub:**
+    Open your terminal in VS Code and run:
+    ```bash
+    git add Dockerfile .dockerignore
+    git commit -m "Add Docker configuration for reliable deployment"
+    git push
+>>>>>>> cffb6fc82d787c6bb682d06356a930398b6206ae

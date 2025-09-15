@@ -1,3 +1,5 @@
+
+=======
 # Use an official Python runtime as a parent image
 FROM python:3.9-slim
 
@@ -40,3 +42,5 @@ EXPOSE 5000
 
 # Run the app using gunicorn
 CMD ["gunicorn", "--workers", "2", "--bind", "0.0.0.0:5000", "app:app"]
+
+>>>>>>> cffb6fc82d787c6bb682d06356a930398b6206ae
